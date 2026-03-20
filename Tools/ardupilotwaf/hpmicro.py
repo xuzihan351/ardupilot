@@ -169,6 +169,8 @@ def pre_build(self):
                 inc_data = fh.read()
             # replace placeholder with project source root
             inc_data = inc_data.replace('{ARDUPILOT_PATH}', self.env.SRCROOT)
+            inc_data = inc_data.replace('{ARDUPILOT_BOARD_NAME}', self.env.BOARD)
+            inc_data = inc_data.replace('{HPM_SDK_BASE}', os.getenv('HPM_SDK_BASE', os.path.join(self.env.SRCROOT, 'modules/hpm_sdk')))
             # write processed includes file into build directory
             out_includes = os.path.join(self.env.BUILDROOT, 'includes_ap_hal_hpmicro.list')
             with open(out_includes, 'w') as fh:

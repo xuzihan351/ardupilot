@@ -33,7 +33,7 @@ static Empty::UARTDriver serial6Driver;
 static Empty::UARTDriver serial7Driver;
 static Empty::UARTDriver serial8Driver;
 static Empty::UARTDriver serial9Driver;
-static HPMicro::UARTDriver cons(1);
+static HPMicro::UARTDriver cons(0);
 #ifdef HAL_WITH_USB_VCP
 static HPMicro::USBVCPDriver VCPConsoleDriver(0);
 #else
