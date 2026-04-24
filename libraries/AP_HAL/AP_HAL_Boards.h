@@ -74,6 +74,7 @@
 
 #define HAL_BOARD_SUBTYPE_HPMPILOTBF67          7001
 
+#define HAL_BOARD_SUBTYPE_SIYI_V6X_FMU_HPM          7002
 /* InertialSensor driver types */
 #define HAL_INS_NONE         0
 #define HAL_INS_MPU60XX_SPI  2

@@ -741,11 +741,11 @@ class hpmicro(Board):
         env.DEFINES.update(
             AP_AIRSPEED_ENABLED = 1,
             )
-        tt = self.name[3:]
+        tt = self.name[0:]
 
         # this makes sure we get the correct subtype
         env.DEFINES.update(
-            CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_HPM%s' %  tt.upper() ,
+            CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_%s' %  tt.upper() ,
         )
 
         env.DEFINES.update(AP_SIM_ENABLED = 0)

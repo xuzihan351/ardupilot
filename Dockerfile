@@ -11,16 +11,20 @@ ARG SKIP_AP_EXT_ENV=0
 ARG SKIP_AP_GRAPHIC_ENV=1
 ARG SKIP_AP_COV_ENV=1
 ARG SKIP_AP_GIT_CHECK=1
-ARG DO_AP_STM_ENV=1
+ARG DO_AP_STM_ENV=0
 
 RUN groupadd ${USER_NAME} --gid ${USER_GID}\
     && useradd -l -m ${USER_NAME} -u ${USER_UID} -g ${USER_GID} -s /bin/bash
+
+RUN sed -i 's@//.*archive.ubuntu.com@//mirrors.aliyun.com@g' /etc/apt/sources.list && \
+    sed -i 's@//.*security.ubuntu.com@//mirrors.aliyun.com@g' /etc/apt/sources.list
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     lsb-release \
     sudo \
     tzdata \
-    bash-completion
+    bash-completion \
+    cmake
 
 COPY Tools/environment_install/install-prereqs-ubuntu.sh /ardupilot/Tools/environment_install/
 COPY Tools/completion /ardupilot/Tools/completion/
@@ -43,7 +47,14 @@ RUN SKIP_AP_EXT_ENV=$SKIP_AP_EXT_ENV SKIP_AP_GRAPHIC_ENV=$SKIP_AP_GRAPHIC_ENV SK
 RUN git config --global --add safe.directory $PWD
 
 # Check that local/bin are in PATH for pip --user installed package
-RUN echo "if [ -d \"\$HOME/.local/bin\" ] ; then\nPATH=\"\$HOME/.local/bin:\$PATH\"\nfi" >> ~/.ardupilot_env
+RUN echo "if [ -d \"\$HOME/.local/bin\" ] ; then\nPATH=\"\$HOME/.local/bin:\$PATH\"\nfi\n" >> ~/.ardupilot_env
+
+# Check that /toolchain/bin are in PATH for HPMicro build
+RUN echo "\n\nif [ -d \"/toolchain/bin\" ] ; then\nPATH=\"/toolchain/bin:\$PATH\"\nfi" >> ~/.ardupilot_env
+
+ENV HPM_SDK_BASE=/ardupilot/modules/hpm_sdk
+
+ENV GNURISCV_TOOLCHAIN_PATH=/toolchain
 
 # Create entrypoint as docker cannot do shell substitution correctly
 RUN export ARDUPILOT_ENTRYPOINT="/home/${USER_NAME}/ardupilot_entrypoint.sh" \
@@ -56,6 +67,10 @@ RUN export ARDUPILOT_ENTRYPOINT="/home/${USER_NAME}/ardupilot_entrypoint.sh" \
 
 # Set the buildlogs directory into /tmp as other directory aren't accessible
 ENV BUILDLOGS=/tmp/buildlogs
+
+RUN pip install pyyaml -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn
+
+COPY --chown=${USER_NAME} toolchain /toolchain
 
 # Cleanup
 RUN sudo apt-get clean \
