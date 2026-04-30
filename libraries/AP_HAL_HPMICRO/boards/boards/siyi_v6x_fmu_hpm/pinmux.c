@@ -44,7 +44,7 @@ void init_uart_pins(UART_Type *ptr)
 void init_sdxc_cmd_pin(SDXC_Type *ptr, bool open_drain, bool is_1v8)
 {
     uint32_t cmd_func_ctl = IOC_PAD_FUNC_CTL_ALT_SELECT_SET(17) | IOC_PAD_FUNC_CTL_LOOP_BACK_SET(1);
-    uint32_t cmd_pad_ctl = IOC_PAD_PAD_CTL_MS_SET(is_1v8) | IOC_PAD_PAD_CTL_DS_SET(6) | IOC_PAD_PAD_CTL_PE_SET(1) |
+    uint32_t cmd_pad_ctl = IOC_PAD_PAD_CTL_MS_SET(is_1v8) | IOC_PAD_PAD_CTL_DS_SET(7) | IOC_PAD_PAD_CTL_PE_SET(1) |
                            IOC_PAD_PAD_CTL_PS_SET(1);
     if (open_drain) {
         cmd_pad_ctl |= IOC_PAD_PAD_CTL_OD_MASK;
@@ -59,7 +59,7 @@ void init_sdxc_cmd_pin(SDXC_Type *ptr, bool open_drain, bool is_1v8)
 
 void init_sdxc_cd_pin(SDXC_Type  *ptr, bool as_gpio)
 {
-    uint32_t cd_pad_ctl = IOC_PAD_PAD_CTL_DS_SET(6) | IOC_PAD_PAD_CTL_PE_SET(1) | IOC_PAD_PAD_CTL_PS_SET(1);
+    uint32_t cd_pad_ctl = IOC_PAD_PAD_CTL_DS_SET(7) | IOC_PAD_PAD_CTL_PE_SET(1) | IOC_PAD_PAD_CTL_PS_SET(1);
     if (ptr == HPM_SDXC0) {
         if (as_gpio) {
             /* SDXC1.CDN */
@@ -73,7 +73,7 @@ void init_sdxc_cd_pin(SDXC_Type  *ptr, bool as_gpio)
 void init_sdxc_clk_data_pins(SDXC_Type *ptr, uint32_t width, bool is_1v8)
 {
     uint32_t func_ctl = IOC_PAD_FUNC_CTL_ALT_SELECT_SET(17);
-    uint32_t pad_ctl = IOC_PAD_PAD_CTL_MS_SET(is_1v8) | IOC_PAD_PAD_CTL_DS_SET(6) | IOC_PAD_PAD_CTL_PE_SET(1) |
+    uint32_t pad_ctl = IOC_PAD_PAD_CTL_MS_SET(is_1v8) | IOC_PAD_PAD_CTL_DS_SET(7) | IOC_PAD_PAD_CTL_PE_SET(1) |
                        IOC_PAD_PAD_CTL_PS_SET(1);
 
     if (ptr == HPM_SDXC0) {
@@ -165,6 +165,13 @@ void init_i2c_pins_as_gpio(I2C_Type *ptr)
         /* PZ port IO needs to configure BIOC as well */
         HPM_BIOC->PAD[IOC_PAD_PZ11].FUNC_CTL = 3;
         HPM_BIOC->PAD[IOC_PAD_PZ10].FUNC_CTL = 3;
+    } else if (ptr == HPM_I2C2) {
+        /* I2C0 */
+        HPM_IOC->PAD[IOC_PAD_PB04].FUNC_CTL = IOC_PZ11_FUNC_CTL_GPIO_Z_11;
+        HPM_IOC->PAD[IOC_PAD_PB03].FUNC_CTL = IOC_PZ10_FUNC_CTL_GPIO_Z_10;
+        /* PZ port IO needs to configure BIOC as well */
+        HPM_BIOC->PAD[IOC_PAD_PB04].FUNC_CTL = 3;
+        HPM_BIOC->PAD[IOC_PAD_PB03].FUNC_CTL = 3;
     } else {
         while (1) {
         }
@@ -173,16 +180,20 @@ void init_i2c_pins_as_gpio(I2C_Type *ptr)
 
 void init_i2c_pins(I2C_Type *ptr)
 {
-    if (ptr == HPM_I2C0) {
-        HPM_IOC->PAD[IOC_PAD_PZ11].FUNC_CTL = IOC_PB11_FUNC_CTL_I2C0_SCL
+    if (ptr == HPM_I2C2) {
+        HPM_IOC->PAD[IOC_PAD_PB04].FUNC_CTL = IOC_PB04_FUNC_CTL_I2C2_SCL
                                             | IOC_PAD_FUNC_CTL_LOOP_BACK_MASK;
-        HPM_IOC->PAD[IOC_PAD_PZ10].FUNC_CTL = IOC_PB10_FUNC_CTL_I2C0_SDA
+        HPM_IOC->PAD[IOC_PAD_PB03].FUNC_CTL = IOC_PB03_FUNC_CTL_I2C2_SDA
                                             | IOC_PAD_FUNC_CTL_LOOP_BACK_MASK;
-        /* PZ port IO needs to configure BIOC as well */
-        HPM_BIOC->PAD[IOC_PAD_PZ11].FUNC_CTL = 3;
-        HPM_BIOC->PAD[IOC_PAD_PZ10].FUNC_CTL = 3;
-        HPM_IOC->PAD[IOC_PAD_PZ11].PAD_CTL = IOC_PAD_PAD_CTL_OD_MASK;
-        HPM_IOC->PAD[IOC_PAD_PZ10].PAD_CTL = IOC_PAD_PAD_CTL_OD_MASK;
+        HPM_IOC->PAD[IOC_PAD_PB04].PAD_CTL = IOC_PAD_PAD_CTL_OD_MASK;
+        HPM_IOC->PAD[IOC_PAD_PB03].PAD_CTL = IOC_PAD_PAD_CTL_OD_MASK;
+    } else if (ptr == HPM_I2C3) {
+        HPM_IOC->PAD[IOC_PAD_PB14].FUNC_CTL = IOC_PB14_FUNC_CTL_I2C3_SCL
+                                            | IOC_PAD_FUNC_CTL_LOOP_BACK_MASK;
+        HPM_IOC->PAD[IOC_PAD_PB13].FUNC_CTL = IOC_PB13_FUNC_CTL_I2C3_SDA
+                                            | IOC_PAD_FUNC_CTL_LOOP_BACK_MASK;
+        HPM_IOC->PAD[IOC_PAD_PB14].PAD_CTL = IOC_PAD_PAD_CTL_OD_MASK;
+        HPM_IOC->PAD[IOC_PAD_PB13].PAD_CTL = IOC_PAD_PAD_CTL_OD_MASK;
     } else {
         while (1) {
         }
@@ -634,5 +645,11 @@ void init_uart_break_signal_pin(void)
 {
     HPM_IOC->PAD[IOC_PAD_PE31].PAD_CTL = IOC_PAD_PAD_CTL_PE_SET(1) | IOC_PAD_PAD_CTL_PS_SET(1);
     HPM_IOC->PAD[IOC_PAD_PE31].FUNC_CTL = IOC_PE31_FUNC_CTL_GPIO_E_31;
+}
+
+void init_sdxc0_pwr_pin(void)
+{
+    HPM_IOC->PAD[IOC_PAD_PD13].FUNC_CTL = IOC_PD13_FUNC_CTL_GPIO_D_13;
+    HPM_IOC->PAD[IOC_PAD_PD13].PAD_CTL = IOC_PAD_PAD_CTL_DS_SET(1) | IOC_PAD_PAD_CTL_PE_SET(1) | 0x08 | IOC_PAD_PAD_CTL_PS_SET(1);
 }
 

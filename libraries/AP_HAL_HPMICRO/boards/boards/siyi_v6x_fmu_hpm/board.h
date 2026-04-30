@@ -56,9 +56,8 @@
 #define BOARD_APP_SDCARD_SUPPORT_3V3               (1)
 #define BOARD_APP_SDCARD_SUPPORT_1V8               (0)
 #define BOARD_APP_SDCARD_SUPPORT_4BIT              (1)
-#define BOARD_APP_SDCARD_SUPPORT_CARD_DETECTION    (1)
-#define BOARD_APP_SDCARD_SUPPORT_POWER_SWITCH      (0)
-#define BOARD_APP_SDCARD_POWER_SWITCH_USING_GPIO   (0)
+#define BOARD_APP_SDCARD_SUPPORT_POWER_SWITCH      (1)
+#define BOARD_APP_SDCARD_POWER_SWITCH_USING_GPIO   (1)
 #define BOARD_APP_SDCARD_SUPPORT_VOLTAGE_SWITCH    (0)
 #define BOARD_APP_SDCARD_CARD_DETECTION_USING_GPIO (1)
 #if defined(BOARD_APP_SDCARD_CARD_DETECTION_USING_GPIO) && (BOARD_APP_SDCARD_CARD_DETECTION_USING_GPIO == 1)
@@ -66,7 +65,7 @@
 #define BOARD_APP_SDCARD_CARD_DETECTION_PIN_POL 1 /* PIN value 0 means card is inserted */
 #endif
 #if defined(BOARD_APP_SDCARD_POWER_SWITCH_USING_GPIO) && (BOARD_APP_SDCARD_POWER_SWITCH_USING_GPIO == 1)
-#define BOARD_APP_SDCARD_POWER_SWITCH_PIN     IOC_PAD_PC20
+#define BOARD_APP_SDCARD_POWER_SWITCH_PIN     IOC_PAD_PD13
 #define BOARD_APP_SDCARD_POWER_SWITCH_PIN_POL 0 /* PIN value 1 means power is supplied */
 #endif
 
@@ -373,7 +372,6 @@
 /* SDXC section */
 #define BOARD_APP_SDCARD_SDXC_BASE                 (HPM_SDXC0)
 #define BOARD_APP_SDCARD_SUPPORT_1V8               (0)
-#define BOARD_APP_SDCARD_SUPPORT_CARD_DETECTION    (1)
 #define BOARD_APP_SDCARD_CARD_DETECTION_USING_GPIO (1)
 #if BOARD_APP_SDCARD_CARD_DETECTION_USING_GPIO
 #define BOARD_APP_SDCARD_CARD_DETECTION_GPIO       HPM_GPIO0
@@ -686,6 +684,7 @@ uint8_t board_get_led_gpio_off_level(void);
 
 void board_init_gptmr_channel_pin(GPTMR_Type *ptr, uint32_t channel, bool as_comp);
 
+void init_sdxc_pwr_pin(SDXC_Type *ptr, bool as_gpio);
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

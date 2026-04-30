@@ -13,6 +13,8 @@ import sys
 import os
 import filecmp
 import pickle
+import subprocess
+import json
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../libraries/AP_HAL/hwdef/scripts'))
 
@@ -231,6 +233,47 @@ class HPMicroHWDef(object):
 
         self.write_env_py(os.path.join(self.outdir, "env.py"))
 
+        # Try to compute HAL_HPM storage symbols by invoking compute_storage_symbols.py
+        try:
+            # determine board name from alllines
+            board_name = None
+            for d in self.alllines:
+                m = re.match(r"define\s+HAL_HPM_BOARD_NAME\s+(.*)", d)
+                if m:
+                    bn = m.group(1).strip()
+                    # strip quotes if present
+                    if bn.startswith('"') and bn.endswith('"'):
+                        bn = bn[1:-1]
+                    board_name = bn
+                    break
+
+            if board_name:
+                # locate compute script relative to this file
+                script_path = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'boards', 'compute_storage_symbols.py'))
+                if os.path.exists(script_path):
+                    # run script and parse JSON lines
+                    proc = subprocess.run([sys.executable, script_path], capture_output=True, text=True)
+                    if proc.returncode == 0 and proc.stdout:
+                        for line in proc.stdout.splitlines():
+                            try:
+                                j = json.loads(line)
+                            except Exception:
+                                continue
+                            if j.get('board') == board_name:
+                                suggestion = j.get('suggestion', {})
+                                base = suggestion.get('HAL_HPM_STORAGE_FLASH_BASE_ADDR')
+                                off = suggestion.get('HAL_HPM_STORAGE_OFFSET_ADDR')
+                                if base and off:
+                                    # write overrides to hwdef.h
+                                    f.write('\n#undef HAL_HPM_STORAGE_FLASH_BASE_ADDR\n')
+                                    f.write(f'#define HAL_HPM_STORAGE_FLASH_BASE_ADDR {base}\n')
+                                    f.write('\n#undef HAL_HPM_STORAGE_OFFSET_ADDR\n')
+                                    f.write(f'#define HAL_HPM_STORAGE_OFFSET_ADDR {off}\n')
+                                break
+        except Exception:
+            # do not fail the whole generation if compute script fails
+            pass
+
     def process_line(self, line, depth):
         '''process one line of pin definition file'''
         # keep all config lines for later use
@@ -366,10 +409,23 @@ class HPMicroHWDef(object):
 
         seriallist = []
         for serial in self.hpmicro_serials:
-            if len(serial) != 12:
-                self.error(f"Badly formed HPMICRO_SERIALS line {serial} {len(serial)=}")
-            (port, clk, rxpin, txpin, rx_af, tx_af, rx_baf, tx_baf, rx_paf, tx_paf, irq_num, idx) = serial
-            seriallist.append(f"{{ .port={port}, .clk={clk}, .rx={rxpin}, .tx={txpin}, .rx_af={rx_af}, .tx_af={tx_af}, .rx_baf={rx_baf}, .tx_baf={tx_baf}, .rx_paf={rx_paf}, .tx_paf={tx_paf}, .irq_num={irq_num}, .idx={idx} }}")
+            if len(serial) == 12:
+                (port, clk, rxpin, txpin, rx_af, tx_af, rx_baf, tx_baf, rx_paf, tx_paf, irq_num, idx) = serial
+                cts = '0'
+                rts = '0'
+                cts_af = '0'
+                rts_af = '0'
+                cts_baf = '0'
+                rts_baf = '0'
+                cts_paf = '0'
+                rts_paf = '0'
+            elif len(serial) == 20:
+                (port, clk, rxpin, txpin, rx_af, tx_af, rx_baf, tx_baf, rx_paf, tx_paf, irq_num, idx,
+                 cts, rts, cts_af, rts_af, cts_baf, rts_baf, cts_paf, rts_paf) = serial
+            else:
+                self.error(f"Badly formed HPMICRO_SERIAL line {serial} {len(serial)=}")
+            seriallist.append(
+                f"{{ .port={port}, .clk={clk}, .rx={rxpin}, .tx={txpin}, .rx_af={rx_af}, .tx_af={tx_af}, .rx_baf={rx_baf}, .tx_baf={tx_baf}, .rx_paf={rx_paf}, .tx_paf={tx_paf}, .irq_num={irq_num}, .idx={idx}, .cts={cts}, .rts={rts}, .cts_af={cts_af}, .rts_af={rts_af}, .cts_baf={cts_baf}, .rts_baf={rts_baf}, .cts_paf={cts_paf}, .rts_paf={rts_paf} }}")
 
         self.write_device_table(f, 'serial devices', 'HAL_HPM_UART_DEVICES', seriallist)
 

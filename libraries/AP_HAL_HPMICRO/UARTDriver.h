@@ -34,6 +34,14 @@ struct UARTDesc {
     int tx_paf;
     uint32_t irq_num;
     uint8_t idx;
+    int cts;
+    int rts;
+    int cts_af;
+    int rts_af;
+    int cts_baf;
+    int rts_baf;
+    int cts_paf;
+    int rts_paf;
 };
 
 class UARTDriver : public AP_HAL::UARTDriver

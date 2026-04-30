@@ -35,9 +35,14 @@
 //#define PROBE_IMU_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,GET_I2C_DEVICE(bus, addr),##args))
 //#define HAL_INS_PROBE_LIST PROBE_IMU_I2C(Invensense, 0, 0x68, ROTATION_NONE)
 #define PROBE_IMU_SPI(driver, devname, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,hal.spi->get_device(devname),##args))
-#define HAL_INS_PROBE_LIST PROBE_IMU_SPI( Invensense, HAL_INS_ICM20608_NAME, ROTATION_NONE)
+#define HAL_INS_PROBE_LIST PROBE_IMU_SPI( Invensensev3, HAL_INS_ICM45686_NAME, ROTATION_NONE)
 //#define HAL_HPM_I2C_BUSES
 
+/*
+  barometer list
+ */
+#define PROBE_BARO_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_Baro_ ## driver::probe(*this,std::move(GET_I2C_DEVICE(bus, addr)),##args))
+#define HAL_BARO_PROBE_LIST PROBE_BARO_I2C(ICP201XX, 2, 0x63)
 //RMT pin number
 #define HAL_HPM_RMT_RX_PIN_NUMBER 4
 
@@ -45,7 +50,7 @@
 #define HAL_BARO_ALLOW_INIT_NO_BARO 1
 
 #define HAL_PWM_GROUPS {\
-    { .mcpwm_group_id = 0, .base = HPM_PWM1, .clock = clock_mot2, .rc_frequency = 50, .ch_mask = 0xFF, }, \
+    { .mcpwm_group_id = 0, .base = HPM_PWM3, .clock = clock_mot3, .rc_frequency = 50, .ch_mask = 0xFF, }, \
 }
 
 #define NUM_SERVO_CHANNELS    6
@@ -66,7 +71,7 @@
 #define HAL_USE_ADC 0
 
 //LED
-#define DEFAULT_NTF_LED_TYPES Notify_LED_None
+#define DEFAULT_NTF_LED_TYPES Notify_LED_Board
 // #define AP_FEATURE_BOARD_DETECT 1
 #define AP_COMPASS_I2C_BACKEND_DEFAULT_ENABLED 0
 #define AP_BARO_BACKEND_DEFAULT_ENABLED 0
@@ -97,4 +102,5 @@
 #define HAL_INS_ICM20608_AM_NAME "icm20608-am"
 #define HAL_INS_ICM20608_EXT_NAME "icm20608_ext"
 
+#define HAL_INS_ICM45686_NAME "icm45686"
 // disable all frames for sim on hw except quad to save DRAM .bss

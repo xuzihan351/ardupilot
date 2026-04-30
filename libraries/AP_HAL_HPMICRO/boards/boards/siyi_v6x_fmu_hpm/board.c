@@ -22,6 +22,11 @@
 #include "hpm_enet_drv.h"
 #include "hpm_pcfg_drv.h"
 #include "hpm_sdk_version.h"
+#include "pinmux.h"
+#include "board.h"
+#include "hpm_gpio_drv.h"
+#include "hpm_gpiom_drv.h"
+
 
 /**
  * @brief FLASH configuration option definitions:
@@ -217,6 +222,28 @@ void board_init(void)
 {
     board_init_clock();
     board_init_pmp();
+    HPM_IOC->PAD[IOC_PAD_PB06].FUNC_CTL = IOC_PB06_FUNC_CTL_GPIO_B_06;
+
+    gpiom_set_pin_controller(HPM_GPIOM, GPIOM_ASSIGN_GPIOB, 6, gpiom_soc_gpio0);
+    gpio_set_pin_output(HPM_GPIO0, GPIO_OE_GPIOB, 6);
+    gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOB, 6, 1);
+    HPM_IOC->PAD[IOC_PAD_PY05].FUNC_CTL = IOC_PY05_FUNC_CTL_GPIO_Y_05;
+    HPM_PIOC->PAD[IOC_PAD_PY05].FUNC_CTL = PIOC_PY05_FUNC_CTL_SOC_PY_05;
+
+    gpiom_set_pin_controller(HPM_GPIOM, GPIOM_ASSIGN_GPIOY, 5, gpiom_soc_gpio0);
+    gpio_set_pin_output(HPM_GPIO0, GPIO_OE_GPIOY, 5);
+    gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOY, 5, 1);
+    HPM_IOC->PAD[IOC_PAD_PC17].FUNC_CTL = IOC_PC17_FUNC_CTL_GPIO_C_17;
+
+    gpiom_set_pin_controller(HPM_GPIOM, GPIOM_ASSIGN_GPIOC, 17, gpiom_soc_gpio0);
+    gpio_set_pin_output(HPM_GPIO0, GPIO_OE_GPIOC, 17);
+    gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOC, 17, 1);
+    HPM_IOC->PAD[IOC_PAD_PD03].FUNC_CTL = IOC_PD03_FUNC_CTL_GPIO_D_03;
+
+    gpiom_set_pin_controller(HPM_GPIOM, GPIOM_ASSIGN_GPIOD, 3, gpiom_soc_gpio0);
+    gpio_set_pin_output(HPM_GPIO0, GPIO_OE_GPIOD, 3);
+    gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOD, 3, 1);
+    board_delay_ms(100);
 }
 
 void board_init_core1(void)
@@ -1158,3 +1185,12 @@ void board_init_gptmr_channel_pin(GPTMR_Type *ptr, uint32_t channel, bool as_com
     init_gptmr_channel_pin(ptr, channel, as_comp);
 }
 
+void init_sdxc_pwr_pin(SDXC_Type *ptr, bool as_gpio)
+{
+    if (ptr == HPM_SDXC0) {
+        if (as_gpio) {
+            /* SD_PWR */
+            init_sdxc0_pwr_pin();
+        }
+    }
+}

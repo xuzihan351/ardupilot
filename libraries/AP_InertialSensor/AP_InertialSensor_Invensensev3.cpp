@@ -971,12 +971,14 @@ bool AP_InertialSensor_Invensensev3::check_whoami(void)
     }
     // check 456 who am i
     whoami = register_read(INV3REG_456_WHOAMI);
+    hal.console->printf("who am i 0x%x\n", whoami);
     switch (whoami) {
     case INV3_ID_ICM45686:
         inv3_type = Invensensev3_Type::ICM45686;
         return true;
     }
     // not a value WHOAMI result
+    hal.console->printf("%s %d\n", __func__, __LINE__);
     return false;
 }
 
@@ -1032,11 +1034,12 @@ bool AP_InertialSensor_Invensensev3::hardware_init(void)
     dev->set_speed(AP_HAL::Device::SPEED_LOW);
 
     if (!check_whoami()) {
+    hal.console->printf("%s %d\n", __func__, __LINE__);
         return false;
     }
 
     dev->set_speed(AP_HAL::Device::SPEED_HIGH);
-
+    hal.console->printf("%s %d\n", __func__, __LINE__);
     switch (inv3_type) {
     case Invensensev3_Type::ICM45686:
     case Invensensev3_Type::ICM40609:
@@ -1065,6 +1068,7 @@ bool AP_InertialSensor_Invensensev3::hardware_init(void)
             hal.scheduler->delay(5);
         }
         if (register_read(INV3REG_70_MCLK_RDY) == 0) {
+    hal.console->printf("%s %d\n", __func__, __LINE__);
             return false;
         }
 
@@ -1090,10 +1094,11 @@ bool AP_InertialSensor_Invensensev3::hardware_init(void)
 
         // do soft reset
         register_write(INV3REG_456_REG_MISC2, 0x02);
-        hal.scheduler->delay_microseconds(1000);
+        hal.scheduler->delay_microseconds(30000);
         // check if reset done
         if (!(register_read(INV3REG_456_INT1_STATUS0) & 0x80)) {
             // failed to reset
+            hal.console->printf("%s %d\n", __func__, __LINE__);
             return false;
         }
         // turn off aux1
@@ -1118,6 +1123,7 @@ bool AP_InertialSensor_Invensensev3::hardware_init(void)
         uint8_t reg = register_read_bank_icm456xy(INV3BANK_456_IPREG_TOP1_ADDR, 0x68);  // I3C_STC_MODE b2
         register_write_bank_icm456xy(INV3BANK_456_IPREG_TOP1_ADDR, 0x68, reg & ~0x04);
     }
+    hal.console->printf("%s %d\n", __func__, __LINE__);
 
     return true;
 }

@@ -210,7 +210,7 @@ SPIDevice::SPIDevice(SPIBus &_bus, SPIDeviceDesc &_device_desc)
     spi_format_init(bus_desc[_bus.bus].host, &format_config);
     pname = (char *)malloc(strlen(device_desc.name)+1);
     strcpy(pname, device_desc.name);
-    hpmhal.console->printf("spi device constructed %s\n", pname);
+    hpmhal.console->printf("spi device constructed %s bus %d instance %lx\n", pname, _bus.bus, (uint32_t)bus_desc[_bus.bus].host);
 }
 
 SPIDevice::~SPIDevice()

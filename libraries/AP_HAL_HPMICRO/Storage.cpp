@@ -19,7 +19,7 @@
 #define HAL_HPM_STORAGE_OFFSET_ADDR 0x0300000
 #endif
 
-// #define STORAGEDEBUG 0
+// #define STORAGEDEBUG 1
 
 using namespace HPMicro;
 

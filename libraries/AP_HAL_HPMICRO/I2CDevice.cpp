@@ -123,20 +123,26 @@ bool I2CDevice::transfer(const uint8_t *send, uint32_t send_len,
         while(1) {
             hpmhal.scheduler->delay(1000);
         }
-        result = true; //TODO check all
+        result = true; // TODO: soft I2C handling
     } else {
         hpm_stat_t stat;
-        if (send_len != 0 && send != nullptr) {
-            stat = i2c_master_write(bus.port, _address, (uint8_t*)send, send_len);
-            if (stat != status_success) {
-                result = false;
+        if (recv_len == 0) {
+            if (send_len == 0 || send == nullptr) {
+                return false;
             }
-        }
-        if (recv_len != 0 && recv != nullptr) {
-            stat = i2c_master_read(bus.port, _address, (uint8_t*)recv, recv_len);
-            if (stat != status_success) {
-                result = false;
+            /* write-only: no internal address, send is the data buffer */
+            stat = i2c_master_address_write(bus.port, _address, (uint8_t*)&send[0], 1, (uint8_t*)&send[1], send_len - 1);
+            result = (stat == status_success);
+        } else if (recv_len != 0 && send_len != 0) {
+            if (send == nullptr || recv == nullptr) {
+                return false;
             }
+            /* address read: send contains the internal address bytes */
+            stat = i2c_master_address_read(bus.port, _address, (uint8_t*)send, send_len, (uint8_t*)recv, recv_len);
+            result = (stat == status_success);
+        } else {
+            /* other cases are errors */
+            return false;
         }
     }
 

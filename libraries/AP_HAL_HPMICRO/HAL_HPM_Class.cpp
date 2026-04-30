@@ -33,11 +33,20 @@ static Empty::UARTDriver serial6Driver;
 static Empty::UARTDriver serial7Driver;
 static Empty::UARTDriver serial8Driver;
 static Empty::UARTDriver serial9Driver;
-static HPMicro::UARTDriver cons(1);
 #ifdef HAL_WITH_USB_VCP
-static HPMicro::USBVCPDriver VCPConsoleDriver(0);
+#ifndef HAL_USB_PORT_IDX
+#define HAL_USB_PORT_IDX 0
+#endif
+#ifdef HAL_USB_MSP
+static HPMicro::USBVCPDriver cons(HAL_USB_PORT_IDX);  //USB VCP as msp port
+static HPMicro::UARTDriver serialConsoleDriver(0, 115200, true);  //UART as console port
 #else
-static HPMicro::UARTDriver serialConsoleDriver(1, 115200, true);
+static HPMicro::UARTDriver cons(1);   //UART as msp port
+static HPMicro::USBVCPDriver serialConsoleDriver(HAL_USB_PORT_IDX);  //USB VCP as console port
+#endif
+#else
+static HPMicro::UARTDriver serialConsoleDriver(0, 115200, true); //UART0 as console port
+static HPMicro::UARTDriver cons(1);   //UART1 as msp port
 #endif
 #if HAL_WITH_DSP
 static Empty::DSP dspDriver;
@@ -104,11 +113,7 @@ HAL_HPM::HAL_HPM() :
         nullptr,
         &analogIn,
         &storageDriver,
-#ifdef HAL_WITH_USB_VCP
-        &VCPConsoleDriver, //Console/mavlink
-#else
-        &serialConsoleDriver,
-#endif
+        &serialConsoleDriver, //Console/mavlink
         &gpioDriver,
         &rcinDriver,
         &rcoutDriver,

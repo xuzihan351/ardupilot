@@ -48,6 +48,9 @@ sdk_compile_options("-Wno-array-bounds")
 sdk_compile_definitions(-DUSE_NONVECTOR_MODE=1)
 sdk_compile_definitions(-DDISABLE_IRQ_PREEMPTIVE=1)
 sdk_compile_definitions(-DNO_CLEANUP_AT_START=1)
+sdk_compile_definitions(-DHPM_I2C_DRV_DEFAULT_RETRY_COUNT=50000)
+sdk_compile_definitions(-DHPM_SPI_DRV_DEFAULT_RETRY_COUNT=50000)
+
 
 sdk_app_src(src/ardupilot_startup.c)
 sdk_ld_options("-lm")

@@ -47,7 +47,7 @@ void init_trgmux_pins(uint32_t pin);
 void init_tamper_pins(void);
 void init_uart_break_signal_pin(void);
 void init_gptmr_channel_pin(GPTMR_Type *ptr, uint32_t channel, bool as_comp);
-
+void init_sdxc0_pwr_pin(void);
 #ifdef __cplusplus
 }
 #endif

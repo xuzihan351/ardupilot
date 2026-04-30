@@ -59,7 +59,7 @@ void USBVCPDriver::_begin(uint32_t b, uint16_t rxS, uint16_t txS)
     } else if (_serial_num == 1) {
         board_init_usb((USB_Type *)HPM_USB1);
         intc_set_irq_priority(IRQn_USB1, 2);
-        cdc_acm_init(0, (uint32_t)HPM_USB1);
+        cdc_acm_init(1, (uint32_t)HPM_USB1);
     } else {
         while (1) {
             hpmhal.scheduler->delay(1);

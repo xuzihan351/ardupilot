@@ -152,10 +152,6 @@ void mount_sdcard()
     if (dstatus != RES_OK) {
         hpmhal.console->printf("Failed to initialize SD disk\n");
     }
-    dstatus = disk_initialize(DEV_SD);
-    if (dstatus != RES_OK) {
-        hpmhal.console->printf("Failed to initialize SD disk\n");
-    }
     fatfs_result = sd_mount_fs();
     if (fatfs_result == FR_NO_FILESYSTEM) {
         hpmhal.console->printf("There is no File system available, making file system...\n");

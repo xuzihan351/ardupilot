@@ -48,27 +48,47 @@ void UARTDriver::_begin(uint32_t b, uint16_t rxS, uint16_t txS)
     }
 
     if (uart_num < ARRAY_SIZE(uart_desc)) {
-        UART_Type *p = uart_desc[uart_num].port;
+        const UARTDesc &desc = uart_desc[uart_num];
+        UART_Type *p = desc.port;
         base = p;
         uart_default_config(p, &config);
         if (!_initialized) {
-            if (uart_desc[uart_num].tx == 0) {
+            if (desc.tx == 0) {
                 return;
             }
-            HPM_IOC->PAD[uart_desc[uart_num].tx].FUNC_CTL = uart_desc[uart_num].tx_af;
-            HPM_IOC->PAD[uart_desc[uart_num].rx].FUNC_CTL = uart_desc[uart_num].rx_af;
-            HPM_PIOC->PAD[uart_desc[uart_num].tx].FUNC_CTL = uart_desc[uart_num].tx_paf;
-            HPM_PIOC->PAD[uart_desc[uart_num].rx].FUNC_CTL = uart_desc[uart_num].rx_paf;
-            HPM_BIOC->PAD[uart_desc[uart_num].tx].FUNC_CTL = uart_desc[uart_num].tx_baf;
-            HPM_BIOC->PAD[uart_desc[uart_num].rx].FUNC_CTL = uart_desc[uart_num].rx_baf;
-            clock_add_to_group(uart_desc[uart_num].clk, 0);
+            HPM_IOC->PAD[desc.tx].FUNC_CTL = desc.tx_af;
+            HPM_IOC->PAD[desc.rx].FUNC_CTL = desc.rx_af;
+            HPM_PIOC->PAD[desc.tx].FUNC_CTL = desc.tx_paf;
+            HPM_PIOC->PAD[desc.rx].FUNC_CTL = desc.rx_paf;
+            HPM_BIOC->PAD[desc.tx].FUNC_CTL = desc.tx_baf;
+            HPM_BIOC->PAD[desc.rx].FUNC_CTL = desc.rx_baf;
+            if (desc.cts != 0) {
+                HPM_IOC->PAD[desc.cts].FUNC_CTL = desc.cts_af;
+                if (desc.cts_paf != 0) {
+                    HPM_PIOC->PAD[desc.cts].FUNC_CTL = desc.cts_paf;
+                }
+                if (desc.cts_baf != 0) {
+                    HPM_BIOC->PAD[desc.cts].FUNC_CTL = desc.cts_baf;
+                }
+            }
+            if (desc.rts != 0) {
+                HPM_IOC->PAD[desc.rts].FUNC_CTL = desc.rts_af;
+                if (desc.rts_paf != 0) {
+                    HPM_PIOC->PAD[desc.rts].FUNC_CTL = desc.rts_paf;
+                }
+                if (desc.rts_baf != 0) {
+                    HPM_BIOC->PAD[desc.rts].FUNC_CTL = desc.rts_baf;
+                }
+            }
+            config.modem_config.auto_flow_ctrl_en = (desc.cts != 0) && (desc.rts != 0);
+            clock_add_to_group(desc.clk, 0);
 #if defined(CONFIG_UART_FIFO_MODE) && (CONFIG_UART_FIFO_MODE == 1)
             config.fifo_enable = true;
 #else
             config.fifo_enable = false;
 #endif
             config.baudrate = b;
-            config.src_freq_in_hz = clock_get_frequency(uart_desc[uart_num].clk);
+            config.src_freq_in_hz = clock_get_frequency(desc.clk);
 
             stat = uart_init(p, &config);
             if (stat != status_success) {
@@ -79,11 +99,11 @@ void UARTDriver::_begin(uint32_t b, uint16_t rxS, uint16_t txS)
             _uart_owner_thd = xTaskGetCurrentTaskHandle();
 
             uart_enable_irq(p, uart_intr_rx_data_avail_or_timeout);
-            intc_m_enable_irq_with_priority(uart_desc[uart_num].irq_num, 1);
+            intc_m_enable_irq_with_priority(desc.irq_num, 1);
             _initialized = true;
         } else {
             flush();
-            config.src_freq_in_hz = clock_get_frequency(uart_desc[uart_num].clk);
+            config.src_freq_in_hz = clock_get_frequency(desc.clk);
             uart_set_baudrate(p, b, config.src_freq_in_hz);
 
         }

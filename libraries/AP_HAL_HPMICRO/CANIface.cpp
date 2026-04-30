@@ -692,7 +692,6 @@ extern "C"
     // FDCAN3
     SDK_DECLARE_EXT_ISR_M(IRQn_CAN2, can2_irq_handler);
     void can2_irq_handler(void)
-    void can2_irq_handler(void)
     {
         handleCANInterrupt(2);
     }
